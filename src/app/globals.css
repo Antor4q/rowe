@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F3EFEA;
+  --color-cream-light: #F9F7F4;
+  --color-cream-dark: #E8E2D7;
+  --color-espresso: #281C15;
+  --color-espresso-hover: #3D2C22;
+  --color-espresso-light: #4A3A31;
+  --color-sand: #DFD7CB;
+  --font-serif: var(--font-serif), Cormorant Garamond, Georgia, serif;
+  --font-sans: var(--font-sans), Plus Jakarta Sans, system-ui, sans-serif;
+}
+
+:root {
+  --background: #FFFF;
+  --foreground: #281C15;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-editorial {
+  font-family: var(--font-serif), Georgia, serif;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* Custom smooth transitions */
+::selection {
+  background: #281C15;
+  color: #F3EFEA;
+}
+
+/* Subtle grain or backdrop texture if desired */
+.bg-cream {
+  background-color: #FFFF;
+}
