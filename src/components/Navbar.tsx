@@ -11,7 +11,7 @@ import gsap from "gsap";
 const NAV_FONT: React.CSSProperties = {
   fontFamily:
     'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  fontWeight: 700,
+  fontWeight: 500,
 };
 
 const LEFT_LINKS = [
@@ -157,7 +157,7 @@ export default function Navbar() {
       >
         <nav
           aria-label="Main"
-          className="mx-auto grid h-20 container grid-cols-[1fr_auto_1fr] items-center px-5 md:px-10"
+          className="mx-auto grid h-20 container grid-cols-[1fr_auto_1fr] items-center"
         >
           {/* Left */}
           <ul className="hidden items-center gap-8 md:flex">
