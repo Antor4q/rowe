@@ -32,6 +32,8 @@ export default function HeroSection() {
   const busyRef = useRef(false);
 
   const [index, setIndex] = useState(0);
+  // touch device e tap kore tooltip dekhanor jnno
+  const [activeSpot, setActiveSpot] = useState<string | null>(null);
 
   const total = VARIANTS.length;
   const variant = VARIANTS[index];
@@ -87,6 +89,7 @@ export default function HeroSection() {
       if (busyRef.current || !enterRef.current) return;
       busyRef.current = true;
       const next = (index + dir + total) % total;
+      setActiveSpot(null);
 
       gsap
         .timeline({ onComplete: () => (busyRef.current = false) })
@@ -107,20 +110,23 @@ export default function HeroSection() {
   }, [index, step]);
 
   return (
-    <section ref={rootRef} className="relative container mx-auto h-[900px] overflow-hidden">
-      {/* ===== Left: about Rowe + button ===== */}
+    <section
+      ref={rootRef}
+      className="relative container mx-auto h-[680px] overflow-hidden sm:h-[760px] md:h-[840px] lg:h-[900px]"
+    >
+      {/* ===== Left: about Rowe + button (ekhon shob device e dekhay) ===== */}
       <div data-ui-wrap className="pointer-events-none absolute inset-0 z-20">
         <div
           data-reveal
-          className="pointer-events-auto absolute left-4 top-[22%] hidden max-w-[460px] font-sans md:block"
+          className="pointer-events-auto absolute left-4 top-[96px] max-w-[340px] font-sans sm:left-6 sm:top-[112px] sm:max-w-[430px] md:top-[22%] md:max-w-[460px] lg:left-10"
         >
-          <p className="text-xl font-medium leading-snug text-[#222628]">
+          <p className="text-[15px] font-medium leading-snug text-[#222628] sm:text-base md:text-xl">
             Rowe makes considered furniture for modern homes. Sculpted forms, natural materials and quiet
             craftsmanship, designed to be lived in for years.
           </p>
           <Link
             href="/about"
-            className="mt-7 flex w-fit items-center gap-2 rounded-none bg-[#222628] px-7 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:gap-4 hover:bg-[#372310]"
+            className="mt-4 flex w-fit items-center gap-2 rounded-none bg-[#222628] px-5 py-3 text-[13px] font-medium text-white transition-all duration-300 hover:gap-4 hover:bg-[#372310] sm:mt-5 sm:text-sm md:mt-7 md:px-7 md:py-3.5"
           >
             Collection <span aria-hidden>→</span>
           </Link>
@@ -128,11 +134,11 @@ export default function HeroSection() {
       </div>
 
       {/* ===== Logo + chair ===== */}
-      <div className="absolute inset-x-0 -bottom-10">
+      <div className="absolute inset-x-0 -bottom-5">
         {/* Pagination: logo er thik opore */}
-        <div data-pager className="absolute bottom-full right-4 z-20 mb-8">
-          <p data-pager-in className="text-sm tabular-nums text-[#222628]">
-            <span className="text-2xl font-medium">{pad(index + 1)}</span>
+        <div data-pager className="absolute bottom-full right-4 z-20 mb-3 sm:right-6 md:mb-8 lg:right-10">
+          <p data-pager-in className="text-xs tabular-nums text-[#222628] sm:text-sm">
+            <span className="text-xl font-medium md:text-2xl">{pad(index + 1)}</span>
             <span className="text-[#222628]/50"> / {pad(total)}</span>
           </p>
         </div>
@@ -153,10 +159,11 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Banner wrapper: Tailwind positioning only, GSAP inner layers e kaj kore */}
-        <div className="absolute bottom-[18%] left-1/2 z-10 h-[560px] w-[min(90%,1000px)] -translate-x-1/2 md:h-[800px]">
+        {/* Banner wrapper: Tailwind positioning only, GSAP inner layers e kaj kore.
+            bottom-[max(18%,60px)]: choto screen e logo choto hoy, tai chair niche kete jay na */}
+        <div className="absolute bottom-[max(18%,60px)] left-1/2 z-10 h-[340px] w-[min(96%,1000px)] -translate-x-1/2 sm:h-[440px] md:h-[580px] md:w-[min(90%,1000px)] lg:h-[750px]">
           {/* soft ground shadow */}
-          <div className="absolute bottom-[1%] left-1/2 h-8 w-[55%] -translate-x-1/2">
+          <div className="absolute bottom-[1%] left-1/2 h-5 w-[55%] -translate-x-1/2 md:h-8">
             <div data-shadow className="h-full w-full rounded-full bg-black/30 blur-xl" />
           </div>
 
@@ -169,37 +176,47 @@ export default function HeroSection() {
                     alt={`${PRODUCT.name} in ${variant.name}`}
                     fill
                     priority
-                    sizes="(min-width: 1024px) 1000px, 90vw"
+                    sizes="(min-width: 1024px) 1000px, 96vw"
                     style={{ filter: variant.filter ?? "none" }}
                     className="object-contain"
                   />
                 </Link>
 
                 {/* Hotspots */}
-                {hotspots.map((h) => (
-                  <button
-                    key={h.label}
-                    type="button"
-                    data-hotspot
-                    style={{ left: h.x, top: h.y }}
-                    className="group absolute z-10 -translate-x-1/2 -translate-y-1/2"
-                    aria-label={`${h.label}: ${h.value}`}
-                  >
-                    <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
-                    <span className="relative block h-4 w-4 rounded-full border-2 border-[#222628] bg-white" />
-                    <span className="pointer-events-none absolute left-7 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-white px-3 py-2 text-left text-[14px] text-[#222628] opacity-0 transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                      <span className="block text-[15px] uppercase font-medium tracking-widest text-[#222628]">{h.label}</span>
-                      {h.value}
-                    </span>
-                  </button>
-                ))}
+                {hotspots.map((h) => {
+                  const flip = parseFloat(h.x) > 50; // dan dike thakle tooltip bam dike khulbe, overflow hobe na
+                  const isOpen = activeSpot === h.label;
+                  return (
+                    <button
+                      key={h.label}
+                      type="button"
+                      data-hotspot
+                      onClick={() => setActiveSpot(isOpen ? null : h.label)}
+                      style={{ left: h.x, top: h.y }}
+                      className="group absolute z-10 -translate-x-1/2 -translate-y-1/2 before:absolute before:-inset-3 before:content-['']"
+                      aria-label={`${h.label}: ${h.value}`}
+                      aria-expanded={isOpen}
+                    >
+                      <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
+                      <span className="relative block h-3.5 w-3.5 rounded-full border-2 border-[#222628] bg-white md:h-4 md:w-4" />
+                      <span
+                        className={`pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-white px-2.5 py-1.5 text-left text-[12px] text-[#222628] shadow-sm transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 md:px-3 md:py-2 md:text-[14px] ${
+                          flip ? "right-6 md:right-7" : "left-6 md:left-7"
+                        } ${isOpen ? "opacity-100" : "opacity-0"}`}
+                      >
+                        <span className="block text-[12px] font-medium uppercase tracking-widest text-[#222628] md:text-[15px]">
+                          {h.label}
+                        </span>
+                        {h.value}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
       </div>
-
-     
     </section>
   );
 }

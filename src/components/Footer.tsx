@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,30 +13,21 @@ const serif = Cormorant_Garamond({
   weight: ["500", "600", "700"],
 });
 
+// Shob link homepage e jabe
+const HOME = "/";
+
 const COLUMNS = [
   {
     title: "Shop",
-    links: [
-      { label: "Living Room", href: "/shop?category=living-room" },
-      { label: "Dining Room", href: "/shop?category=dining-room" },
-      { label: "Bedroom", href: "/shop?category=bedroom" },
-      { label: "Outdoor", href: "/shop?category=outdoor" },
-    ],
+    links: ["Living Room", "Dining Room", "Bedroom", "Outdoor"],
   },
   {
     title: "Help",
-    links: [
-      { label: "Delivery", href: "/delivery" },
-      { label: "Returns", href: "/returns" },
-      { label: "Contact", href: "/contact" },
-    ],
+    links: ["Delivery", "Returns", "Contact"],
   },
   {
     title: "Follow",
-    links: [
-      { label: "Instagram", href: "https://instagram.com" },
-      { label: "Pinterest", href: "https://pinterest.com" },
-    ],
+    links: ["Instagram", "Pinterest"],
   },
 ];
 
@@ -44,7 +35,73 @@ const COLUMNS = [
 const CROP = 14;
 
 const linkClass =
-  "relative inline-block font-sans text-base font-medium transition-opacity duration-300 hover:opacity-60";
+  "inline-block py-1.5 font-sans text-base font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#222628] sm:py-1";
+
+const legalLinkClass =
+  "inline-block py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#222628]";
+
+/**
+ * Text flip hover: text ta upore uthe jay, ekoi text niche theke ashe.
+ * Color / opacity change kichu nai.
+ */
+function FlipLink({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: string;
+  className?: string;
+}) {
+  const topRef = useRef<HTMLSpanElement>(null);
+  const bottomRef = useRef<HTMLSpanElement>(null);
+
+  const flip = (active: boolean) => {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !topRef.current ||
+      !bottomRef.current
+    ) {
+      return;
+    }
+
+    gsap.to([topRef.current, bottomRef.current], {
+      yPercent: active ? -100 : 0,
+      duration: 0.45,
+      ease: "power3.inOut",
+      overwrite: true,
+    });
+  };
+
+  // Touch e hover emulate hoye atke jete pare, tai shudhu real hover device e
+  const onEnter = () => {
+    if (window.matchMedia("(hover: hover)").matches) flip(true);
+  };
+
+  return (
+    <Link
+      href={href}
+      className={className}
+      onMouseEnter={onEnter}
+      onMouseLeave={() => flip(false)}
+      onFocus={() => flip(true)}
+      onBlur={() => flip(false)}
+    >
+      <span className="relative block overflow-hidden leading-normal">
+        <span ref={topRef} className="block">
+          {children}
+        </span>
+        <span
+          ref={bottomRef}
+          aria-hidden="true"
+          className="absolute left-0 top-full block"
+        >
+          {children}
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
@@ -57,14 +114,25 @@ export default function Footer() {
     const mm = gsap.matchMedia(root);
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      gsap.from("[data-reveal]", {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-        clearProps: "opacity,transform,visibility",
-        scrollTrigger: { trigger: root, start: "top 80%" },
+      // Footer mobile e onek lomba, tai shob item ek shathe na kore
+      // prottek item (ba ek row er item gulo) scroll e ashle reveal hoy.
+      const items = gsap.utils.toArray<HTMLElement>("[data-reveal]", root);
+
+      gsap.set(items, { y: 40, opacity: 0 });
+
+      ScrollTrigger.batch(items, {
+        start: "top 92%",
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: "power3.out",
+            overwrite: true,
+            clearProps: "opacity,transform,visibility",
+          }),
       });
 
       gsap.fromTo(
@@ -92,20 +160,23 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="overflow-hidden bg-[#f0eee8] pt-20 text-[#222628] md:pt-28"
+      className="overflow-hidden bg-[#f0eee8] pt-14 text-[#222628] sm:pt-20 md:pt-28"
     >
-      <div className="container mx-auto px-4">
-        {/* Top: statement + links */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-12 md:gap-8">
-          <div data-reveal className="col-span-2 md:col-span-5">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top: statement + links
+            mobile: 2 col | sm: 3 col | md+: 12-col grid */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-12 md:grid-cols-12 md:gap-8">
+          <div
+            data-reveal
+            className="col-span-2 sm:col-span-3 md:col-span-5"
+          >
             <p
-              className={`${serif.className} text-4xl font-semibold leading-[1.05] md:text-5xl lg:text-6xl`}
+              className={`${serif.className} text-[2rem] font-semibold leading-[1.05] min-[390px]:text-4xl md:text-4xl lg:text-5xl xl:text-6xl`}
             >
               Furniture made
               <br />
               to be lived in.
             </p>
-
           </div>
 
           {COLUMNS.map((col, i) => (
@@ -118,29 +189,14 @@ export default function Footer() {
               <h3 className="font-sans text-sm font-medium text-[#222628]/50">
                 {col.title}
               </h3>
-              <ul className="mt-4 space-y-2">
-                {col.links.map((l) => {
-                  const external = l.href.startsWith("http");
-
-                  return (
-                    <li key={l.label}>
-                      {external ? (
-                        <a
-                          href={l.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={linkClass}
-                        >
-                          {l.label}
-                        </a>
-                      ) : (
-                        <Link href={l.href} className={linkClass}>
-                          {l.label}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
+              <ul className="mt-3 space-y-0.5 sm:mt-4 sm:space-y-1.5">
+                {col.links.map((label) => (
+                  <li key={label}>
+                    <FlipLink href={HOME} className={linkClass}>
+                      {label}
+                    </FlipLink>
+                  </li>
+                ))}
               </ul>
             </nav>
           ))}
@@ -149,29 +205,23 @@ export default function Footer() {
         {/* Legal row */}
         <div
           data-reveal
-          className="mt-16 flex flex-col gap-3 border-t border-[#222628]/15 pt-6 font-sans text-sm font-medium text-[#222628]/60 md:mt-24 md:flex-row md:items-center md:justify-between"
+          className="mt-12 flex flex-col gap-3 border-t border-[#222628]/15 pt-6 font-sans text-sm font-medium text-[#222628]/60 sm:mt-16 md:mt-24 md:flex-row md:items-center md:justify-between"
         >
           <p>&copy; {new Date().getFullYear()} Rowe</p>
 
           <div className="flex gap-6">
-            <Link
-              href="/privacy"
-              className="transition-colors duration-300 hover:text-[#222628]"
-            >
+            <FlipLink href={HOME} className={legalLinkClass}>
               Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="transition-colors duration-300 hover:text-[#222628]"
-            >
+            </FlipLink>
+            <FlipLink href={HOME} className={legalLinkClass}>
               Terms
-            </Link>
+            </FlipLink>
           </div>
         </div>
       </div>
 
       {/* Big wordmark (public/roweLogo.svg), cropped at the bottom */}
-      <div className="container mx-auto mt-10 overflow-hidden px-4 md:mt-14">
+      <div className="container mx-auto mt-8 overflow-hidden px-4 sm:mt-10 sm:px-6 md:mt-14 lg:px-8">
         <div
           ref={logoRef}
           role="img"

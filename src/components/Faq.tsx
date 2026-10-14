@@ -74,6 +74,7 @@ export default function FAQ() {
     if (!root) return;
 
     // first panel open, rest closed
+    // (SSR e-o h-0 class ache, tai hydrate howar age flash hoy na)
     panelRefs.current.forEach((el, i) => {
       if (!el) return;
       gsap.set(el, { height: i === 0 ? "auto" : 0 });
@@ -89,17 +90,20 @@ export default function FAQ() {
         stagger: 0.1,
         ease: "power3.out",
         clearProps: "opacity,transform,visibility",
-        scrollTrigger: { trigger: root, start: "top 75%" },
+        scrollTrigger: { trigger: root, start: "top 80%" },
       });
 
-      gsap.from("[data-row]", {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-        clearProps: "opacity,transform,visibility",
-        scrollTrigger: { trigger: "[data-list]", start: "top 80%" },
+      // Prottek row nijer position e reveal hoy
+      // (mobile e list lomba, shob row ek shathe reveal hole dekha jay na)
+      gsap.utils.toArray<HTMLElement>("[data-row]", root).forEach((row) => {
+        gsap.from(row, {
+          y: 40,
+          opacity: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          clearProps: "opacity,transform,visibility",
+          scrollTrigger: { trigger: row, start: "top 90%" },
+        });
       });
     });
 
@@ -114,11 +118,34 @@ export default function FAQ() {
     const prev = openRef.current;
     const next = prev === i ? null : i;
 
+    // Animation shesh hole: page height badleche, tai trigger position refresh kori.
+    // Upor er item khola thakle ar niche er item tap korle tapped button
+    // screen er upore chole jete pare, tai tokhon scroll kore dekhai.
+    const done = () => {
+      ScrollTrigger.refresh();
+
+      if (next !== null && prev !== null && prev < next) {
+        const btn = document.getElementById(`faq-btn-${next}`);
+
+        if (btn && btn.getBoundingClientRect().top < 0) {
+          btn.scrollIntoView({
+            behavior: reduce ? "auto" : "smooth",
+            block: "nearest",
+          });
+        }
+      }
+    };
+
     // close previous
     if (prev !== null) {
       const el = panelRefs.current[prev];
       if (el) {
-        gsap.to(el, { height: 0, duration, ease: "power3.inOut" });
+        gsap.to(el, {
+          height: 0,
+          duration,
+          ease: "power3.inOut",
+          onComplete: next === null ? done : undefined,
+        });
       }
     }
 
@@ -126,7 +153,12 @@ export default function FAQ() {
     if (next !== null) {
       const el = panelRefs.current[next];
       if (el) {
-        gsap.to(el, { height: "auto", duration, ease: "power3.inOut" });
+        gsap.to(el, {
+          height: "auto",
+          duration,
+          ease: "power3.inOut",
+          onComplete: done,
+        });
       }
     }
 
@@ -137,16 +169,17 @@ export default function FAQ() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-24 text-[#222628]"
+      className="bg-white py-16 text-[#222628] sm:py-20 md:py-24 lg:py-28"
     >
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-8">
-          {/* Left (sticky) */}
-          <div className="md:col-span-4">
-            <div className="md:sticky md:top-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* lg theke 2 column. Tablet/mobile e stack (768px e col-4 onek narrow hoy) */}
+        <div className="grid grid-cols-1 gap-10 sm:gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* Left (sticky shudhu boro + lomba screen e) */}
+          <div className="lg:col-span-4">
+            <div className="[@media(min-width:1024px)_and_(min-height:560px)]:sticky [@media(min-width:1024px)_and_(min-height:560px)]:top-24">
               <h2
                 data-head
-                className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl`}
+                className={`${serif.className} text-[2.75rem] font-semibold leading-none sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl`}
               >
                 Questions,
                 <br />
@@ -155,24 +188,23 @@ export default function FAQ() {
 
               <p
                 data-head
-                className="mt-6 max-w-sm font-sans text-[18px] font-medium leading-snug"
+                className="mt-5 max-w-sm font-sans text-base font-medium leading-snug sm:mt-6 sm:text-[17px] md:max-w-md lg:max-w-sm lg:text-[18px]"
               >
                 Everything you might want to know about delivery, materials
                 and care before you bring a Rowe piece home.
               </p>
 
               <Link
-                data-head
-                href="/contact"
-                className="mt-8 inline-block bg-[#222628] px-6 py-3 font-sans text-sm font-medium text-white transition-opacity duration-300 hover:opacity-80"
-              >
-                Still unsure? Talk to us &rarr;
-              </Link>
+            href="/about"
+            className="mt-4 flex w-fit items-center gap-2 rounded-none bg-[#222628] px-5 py-3 text-[13px] font-medium text-white transition-all duration-300 hover:gap-4 hover:bg-[#372310] sm:mt-5 sm:text-sm md:mt-7 md:px-7 md:py-3.5"
+          >
+            Still unsure? Talk to us <span aria-hidden>→</span>
+          </Link>
             </div>
           </div>
 
           {/* Right (accordion) */}
-          <div data-list className="md:col-span-7 md:col-start-6">
+          <div data-list className="lg:col-span-7 lg:col-start-6">
             {FAQS.map((f, i) => {
               const isOpen = open === i;
 
@@ -191,17 +223,13 @@ export default function FAQ() {
                       aria-expanded={isOpen}
                       aria-controls={`faq-panel-${i}`}
                       id={`faq-btn-${i}`}
-                      className="group flex w-full items-start gap-5 py-6 text-left md:gap-8 md:py-8"
+                      className="group flex w-full scroll-mt-20 items-start gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#222628] sm:gap-6 sm:py-6 md:py-8"
                     >
-                     
-
                       <span className="flex-1">
                         <span className="block font-sans text-xs font-medium text-[#222628]/50">
                           {f.topic}
                         </span>
-                        <span
-                          className={`font-sans mt-1 block text-2xl font-semibold leading-tight md:text-3xl`}
-                        >
+                        <span className="mt-1 block font-sans text-xl font-semibold leading-tight sm:text-2xl md:text-3xl">
                           {f.q}
                         </span>
                       </span>
@@ -226,9 +254,10 @@ export default function FAQ() {
                     id={`faq-panel-${i}`}
                     role="region"
                     aria-labelledby={`faq-btn-${i}`}
-                    className="overflow-hidden"
+                    className={`overflow-hidden ${i === 0 ? "" : "h-0"}`}
                   >
-                    <p className="max-w-xl pb-8 pl-[3.25rem] font-sans text-base leading-relaxed text-[#222628]/70 md:pl-[4.5rem]">
+                    {/* ager number column nei, tai left indent soriye dilam; right e icon er jonno jayga */}
+                    <p className="max-w-xl pb-6 pr-8 font-sans text-base leading-relaxed text-[#222628]/70 sm:pb-8 sm:pr-12">
                       {f.a}
                     </p>
                   </div>

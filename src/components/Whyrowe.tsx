@@ -86,6 +86,18 @@ const FEATURES: Feature[] = [
   },
 ];
 
+/*
+  Layout (left title sticky, 2 column) shudhu tokhon-i on hobe jokhon
+  screen >=768px WIDE ebong >=560px TALL.
+
+  Card stacking (sticky + scale) ekhon mobile e o cholbe, shudhu height >=560px hole.
+  Landscape phone (choto height) e sticky card viewport er baire kete jay,
+  tai oi case e normal stacked flow use hoy.
+  Same condition niche gsap.matchMedia e-o ache (CARD_MQ).
+*/
+const STICKY_MQ = "(min-width: 768px) and (min-height: 560px)";
+const CARD_MQ = "(min-height: 560px)";
+
 export default function WhyRowe() {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -107,55 +119,55 @@ export default function WhyRowe() {
         clearProps: "opacity,transform,visibility",
         scrollTrigger: {
           trigger: root,
-          start: "top 75%",
-        },
-      });
-
-      gsap.from("[data-why-inner]", {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.06,
-        ease: "power3.out",
-        clearProps: "opacity,transform,visibility",
-        scrollTrigger: {
-          trigger: "[data-why-cards]",
           start: "top 80%",
         },
       });
+
+      // Prottek card nijer scroll position e reveal hoy
+      gsap.utils.toArray<HTMLElement>("[data-why-card]", root).forEach((card) => {
+        gsap.from(card.querySelectorAll("[data-why-inner]"), {
+          y: 40,
+          opacity: 0,
+          duration: 0.9,
+          stagger: 0.08,
+          ease: "power3.out",
+          clearProps: "opacity,transform,visibility",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+          },
+        });
+      });
     });
 
-    // Desktop: stacking cards + counter + progress
-    mm.add(
-      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const cards = gsap.utils.toArray<HTMLElement>("[data-why-card]", root);
+    // Mobile + tablet + desktop: stacking cards
+    mm.add(`${CARD_MQ} and (prefers-reduced-motion: no-preference)`, () => {
+      const cards = gsap.utils.toArray<HTMLElement>("[data-why-card]", root);
 
-        // each card shrinks a little as the next one slides over it
-        cards.forEach((card, i) => {
-          const next = cards[i + 1];
+      // each card shrinks a little as the next one slides over it
+      cards.forEach((card, i) => {
+        const next = cards[i + 1];
 
-          if (next) {
-            gsap.to(card, {
-              scale: 0.94 - (cards.length - i) * 0.005,
-              transformOrigin: "center top",
-              ease: "none",
-              scrollTrigger: {
-                trigger: next,
-                start: "top 90%",
-                end: () =>
-                  `top ${parseFloat(getComputedStyle(next).top) + 10}px`,
-                scrub: true,
-                invalidateOnRefresh: true,
-              },
-            });
-          }
-        });
-      }
-    );
+        if (next) {
+          gsap.to(card, {
+            scale: 0.94 - (cards.length - i) * 0.005,
+            transformOrigin: "center top",
+            ease: "none",
+            scrollTrigger: {
+              trigger: next,
+              start: "top 90%",
+              end: () =>
+                `top ${parseFloat(getComputedStyle(next).top) + 10}px`,
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          });
+        }
+      });
+    });
 
-    // Desktop: left text starts at the top, then sticks vertically centered
-    mm.add("(min-width: 768px)", () => {
+    // Left text starts at the top, then sticks vertically centered (shudhu wide screen e)
+    mm.add(STICKY_MQ, () => {
       const box = root.querySelector<HTMLElement>("[data-why-sticky]");
 
       if (!box) return;
@@ -181,20 +193,20 @@ export default function WhyRowe() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-24 text-[#222628]"
+      className="bg-white py-16 text-[#222628] sm:py-20 md:py-24 lg:py-28"
     >
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-8">
-          {/* Left: sticky title */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:gap-12 md:grid-cols-12 md:gap-8">
+          {/* Left: sticky title (mobile e normal flow, card er upore) */}
           <div
             data-why-sticky
-            className="md:col-span-5 md:self-start md:sticky md:top-24"
+            className="md:col-span-5 md:self-start [@media(min-width:768px)_and_(min-height:560px)]:sticky [@media(min-width:768px)_and_(min-height:560px)]:top-24"
           >
             <div className="flex flex-col gap-8">
               <div>
                 <h2
                   data-why-head
-                  className={`${serif.className} text-5xl font-semibold leading-[0.95] md:text-7xl lg:text-8xl`}
+                  className={`${serif.className} text-[2.75rem] font-semibold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl`}
                 >
                   Why
                   <br />
@@ -203,43 +215,39 @@ export default function WhyRowe() {
 
                 <p
                   data-why-head
-                  className="mt-6 font-sans text-base font-medium leading-snug md:w-[80%] md:text-[18px]"
+                  className="mt-5 max-w-md font-sans text-base font-medium leading-snug sm:mt-6 md:w-[80%] md:max-w-none md:text-[18px]"
                 >
                   Furniture you can trust, backed by promises we actually keep.
                 </p>
 
                 <Link
-                  data-why-head
-                  href="/shop"
-                  className="group/btn mt-8 inline-flex items-center gap-2 bg-[#222628] px-5 py-3 font-sans text-sm font-medium text-white"
+                  href="/about"
+                  className="mt-4 flex w-fit items-center gap-2 rounded-none bg-[#222628] px-5 py-3 text-[13px] font-medium text-white transition-all duration-300 hover:gap-4 hover:bg-[#372310] sm:mt-5 sm:text-sm md:mt-7 md:px-7 md:py-3.5"
                 >
-                  Shop collection
-                  <span className="transition-transform duration-500 group-hover/btn:translate-x-1">
-                    →
-                  </span>
+                  Shop Collection <span aria-hidden>→</span>
                 </Link>
               </div>
-
             </div>
           </div>
 
           {/* Right: stacking cards */}
           <div
             data-why-cards
-            className="flex flex-col gap-6 md:col-span-7 md:gap-[18vh]"
+            className="flex flex-col gap-5 sm:gap-6 md:col-span-7 [@media(min-height:560px)]:gap-[18vh]"
           >
             {FEATURES.map((f, i) => (
               <article
                 key={f.title}
                 data-why-card
-                className={`group flex min-h-[20rem] flex-col justify-between p-6 md:sticky md:min-h-[26rem] lg:min-h-[30rem] lg:p-10 ${f.tone}`}
+                className={`group flex min-h-[20rem] flex-col justify-between p-6 sm:min-h-[24rem] sm:p-8 md:min-h-[26rem] lg:min-h-[30rem] lg:p-10 [@media(min-height:560px)]:sticky ${f.tone}`}
                 style={
                   {
+                    // sticky na hole (landscape phone) top er kono effect nei
                     top: `calc(6rem + ${i} * 1.25rem)`,
                   } as CSSProperties
                 }
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <span
                     data-why-inner
                     className={`${serif.className} text-7xl font-semibold leading-none opacity-30 md:text-8xl lg:text-9xl`}
@@ -249,7 +257,7 @@ export default function WhyRowe() {
 
                   <div
                     data-why-inner
-                    className="h-10 w-10 transition-transform duration-700 group-hover:rotate-[12deg] group-hover:scale-110 lg:h-14 lg:w-14"
+                    className="h-9 w-9 shrink-0 transition-transform duration-700 sm:h-12 sm:w-12 lg:h-14 lg:w-14 [@media(hover:hover)]:group-hover:rotate-[12deg] [@media(hover:hover)]:group-hover:scale-110"
                   >
                     {f.icon}
                   </div>
@@ -257,12 +265,12 @@ export default function WhyRowe() {
 
                 <div data-why-inner>
                   <h3
-                    className={`${serif.className} text-4xl font-semibold leading-none md:text-5xl lg:text-6xl`}
+                    className={`${serif.className} text-3xl font-semibold leading-none min-[390px]:text-4xl sm:text-5xl md:text-[2.5rem] lg:text-6xl`}
                   >
                     {f.title}
                   </h3>
 
-                  <p className="mt-4 max-w-[28rem] font-sans text-sm font-medium leading-snug opacity-70 md:text-base">
+                  <p className="mt-4 max-w-[28rem] font-sans text-sm font-medium leading-snug opacity-70 sm:text-base">
                     {f.text}
                   </p>
                 </div>

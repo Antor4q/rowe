@@ -134,21 +134,21 @@ export default function AboutSection() {
     <section
       id="about"
       ref={sectionRef}
-      className="overflow-hidden bg-white py-20 text-[#222628] md:py-28"
+      className="overflow-hidden bg-white py-16 text-[#222628] sm:py-20 md:py-28"
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-12">
+        <div className="flex flex-col gap-5 sm:gap-6 md:flex-row md:items-start md:justify-between md:gap-12">
           <h2
             data-head
-            className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}
+            className={`${serif.className} text-5xl font-semibold leading-none sm:text-6xl md:shrink-0 md:whitespace-nowrap md:text-7xl lg:text-8xl xl:text-[110px]`}
           >
             Eco Rowe
           </h2>
 
           <p
             data-head
-            className="hidden max-w-[520px] font-sans text-[18px] font-medium leading-snug md:block"
+            className="max-w-[520px] font-sans text-base font-medium leading-snug sm:text-[17px] md:text-[18px]"
           >
             You&apos;re not only investing in beautiful and comfortable
             furniture but also reducing negative impacts on the environment.
@@ -159,12 +159,12 @@ export default function AboutSection() {
         {/* Image + giant numbers */}
         <div
           ref={gridRef}
-          className="relative mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-20 md:block"
+          className="relative mt-10 grid grid-cols-2 gap-x-4 gap-y-10 sm:mt-12 md:mt-20 md:block"
         >
           {/* Image (opaque photo, numbers image er dui pashe thake) */}
           <div
             data-img
-            className="relative z-10 col-span-2 mx-auto aspect-[9/10] w-full max-w-[360px] overflow-hidden bg-[#e6e2d9] md:w-[min(34vw,480px)] md:max-w-none lg:w-[min(40vw,600px)]"
+            className="relative z-10 col-span-2 mx-auto aspect-[9/10] w-full max-w-[360px] overflow-hidden bg-[#e6e2d9] sm:max-w-[420px] md:w-[min(34vw,480px)] md:max-w-none lg:w-[min(40vw,600px)]"
           >
             <div data-img-inner className="absolute inset-0">
               <Image
@@ -213,18 +213,18 @@ function Stat({
   right?: boolean;
 }) {
   return (
-    <div data-stat className={`flex flex-col ${className}`}>
+    <div data-stat className={`flex min-w-0 flex-col ${className}`}>
       <div data-par data-from={from} data-to={to} className="flex flex-col">
         <span
           data-count-to={stat.value}
           data-suffix={stat.suffix}
-          className={`${serif.className} block text-[17vw] font-semibold leading-[0.85] [font-variant-numeric:lining-nums] md:text-[clamp(96px,14.5vw,260px)]`}
+          className={`${serif.className} block text-[17vw] font-semibold leading-[0.85] [font-variant-numeric:lining-nums] sm:text-[15vw] md:text-[clamp(96px,14.5vw,260px)]`}
         >
           {stat.value}
           {stat.suffix}
         </span>
 
-        <p className={`mt-3 max-w-[220px] font-sans text-sm font-medium leading-snug md:mt-4 md:text-base md:max-w-[260px] ${right ? "md:ml-auto" : ""}`}>
+        <p className={`mt-3 max-w-[200px] font-sans text-[13px] font-medium leading-snug sm:max-w-[220px] sm:text-sm md:mt-4 md:max-w-[260px] md:text-base ${right ? "md:ml-auto" : ""}`}>
           {stat.label}
         </p>
       </div>

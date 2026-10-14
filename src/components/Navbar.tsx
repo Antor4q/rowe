@@ -5,13 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 
-/* ===== FONT ekhane change koro (shob jaygay apply hobe) =====
+/* ===== FONT + COLOR ekhane change koro (shob jaygay apply hobe) =====
    fontWeight: 500 medium, 600 semibold, 700 bold, 800 extrabold
+   NAV_COLOR: pure black er bodole soft charcoal. Onno color chaile ekhane bodlao.
    Inline style, tai globals.css ba onno kono CSS override korte parbe na */
+const NAV_COLOR = "#3a3a3a";
+const NAV_COLOR_MUTED = "rgba(58, 58, 58, 0.12)"; /* hairline er jnno */
+
 const NAV_FONT: React.CSSProperties = {
   fontFamily:
     'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontWeight: 500,
+  color: NAV_COLOR,
 };
 
 const LEFT_LINKS = [
@@ -59,7 +64,7 @@ function RollLink({
       onFocus={() => roll(-100)}
       onBlur={() => roll(0)}
       style={NAV_FONT}
-      className="relative inline-block overflow-hidden whitespace-nowrap text-[15px] leading-[1.25] tracking-tight outline-none"
+      className="relative inline-block overflow-hidden whitespace-nowrap text-[13px] leading-[1.25] tracking-tight outline-none sm:text-sm lg:text-[15px]"
     >
       <span data-roll className="block">
         {children}
@@ -97,13 +102,14 @@ export default function Navbar() {
     return () => ctx.revert();
   }, []);
 
-  /* Scroll: niche gele hide, upore gele show */
+  /* Scroll: niche gele hide, upore gele show (menu khola thakle hide hobe na) */
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 20);
       if (!headerRef.current) return;
+      if (open) return;
       if (y > lastY && y > 120) {
         gsap.to(headerRef.current, { yPercent: -100, duration: 0.6, ease: "power3.out" });
       } else {
@@ -113,7 +119,7 @@ export default function Navbar() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [open]);
 
   /* Mobile menu timeline */
   useEffect(() => {
@@ -146,21 +152,44 @@ export default function Navbar() {
     }
   }, [open]);
 
+  /* Desktop size e gele mobile menu auto close + body scroll unlock */
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => {
+      mq.removeEventListener("change", onChange);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  /* Escape dile menu close */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <>
       <header
         ref={headerRef}
         style={NAV_FONT}
-        className={`fixed inset-x-0 top-0 z-50 text-[15px] tracking-tight text-neutral-950 transition-colors duration-500 ${
+        className={`fixed inset-x-0 top-0 z-50 text-[15px] tracking-tight transition-colors duration-500 ${
           scrolled || open ? "bg-white/85 backdrop-blur-md" : "bg-white"
         }`}
       >
+        {/* Mobile: 2 col (logo left, Cart/Menu right) | lg+: 3 col (links, logo center, links) */}
         <nav
           aria-label="Main"
-          className="mx-auto grid h-20 container grid-cols-[1fr_auto_1fr] items-center"
+          className="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[1fr_auto] items-center gap-3 px-4 sm:h-[72px] sm:px-6 lg:h-20 lg:grid-cols-[1fr_auto_1fr] lg:px-10 xl:px-14"
         >
-          {/* Left */}
-          <ul className="hidden items-center gap-8 md:flex">
+          {/* Left (lg+ e dekhabe) */}
+          <ul className="hidden items-center gap-6 lg:flex xl:gap-8">
             {LEFT_LINKS.map((l) => (
               <li key={l.label} className="overflow-hidden">
                 <div data-item>
@@ -169,36 +198,39 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-          <div className="md:hidden" />
 
-          {/* Center logo */}
-          <Link href="/" aria-label="Home" className="relative block">
+          {/* Logo: mobile e left, desktop e center */}
+          <Link
+            href="/"
+            aria-label="Home"
+            className="relative block justify-self-start lg:justify-self-center"
+          >
             <div data-logo>
-              {/* Logo: /public/roweLogo.png */}
+              {/* Logo: /public/roweLogo.svg */}
               <Image
                 src="/roweLogo.svg"
                 alt="Logo"
                 width={100}
                 height={40}
                 priority
-                className="h-8 w-auto object-contain md:h-8"
+                className="h-6 w-auto object-contain sm:h-7 lg:h-8"
               />
             </div>
           </Link>
 
           {/* Right */}
-          <ul className="flex items-center justify-end gap-5 md:gap-8">
+          <ul className="flex items-center justify-end gap-4 sm:gap-5 lg:gap-6 xl:gap-8">
             {RIGHT_LINKS.map((l, i) => (
               <li
                 key={l.label}
-                className={`overflow-hidden ${i === 0 || i === 2 ? "hidden md:block" : ""}`}
+                className={`overflow-hidden ${i === 0 || i === 2 ? "hidden lg:block" : ""}`}
               >
                 <div data-item>
                   <RollLink href={l.href}>{l.label}</RollLink>
                 </div>
               </li>
             ))}
-            <li className="overflow-hidden md:hidden">
+            <li className="overflow-hidden lg:hidden">
               <div data-item>
                 <button
                   type="button"
@@ -206,7 +238,7 @@ export default function Navbar() {
                   aria-expanded={open}
                   aria-controls="mobile-menu"
                   style={NAV_FONT}
-                  className="text-[15px] leading-[1.25] tracking-tight"
+                  className="py-2 text-[13px] leading-[1.25] tracking-tight sm:text-sm"
                 >
                   {open ? "Close" : "Menu"}
                 </button>
@@ -218,19 +250,21 @@ export default function Navbar() {
         {/* Bottom hairline */}
         <div
           data-line
-          className={`h-px origin-left bg-neutral-950/10 transition-opacity duration-500 ${
+          style={{ backgroundColor: NAV_COLOR_MUTED }}
+          className={`h-px origin-left transition-opacity duration-500 ${
             scrolled ? "opacity-100" : "opacity-0"
           }`}
         />
       </header>
 
-      {/* Mobile menu */}
+      {/* Mobile / tablet menu */}
       <div
         id="mobile-menu"
         ref={menuRef}
-        className="fixed inset-0 z-40 hidden flex-col justify-between bg-white px-5 pb-10 pt-28 text-neutral-950 md:hidden"
+        style={{ color: NAV_COLOR }}
+        className="fixed inset-0 z-40 hidden flex-col justify-between overflow-y-auto bg-white px-4 pb-10 pt-24 sm:px-6 sm:pt-28 lg:hidden"
       >
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-1 sm:gap-2">
           {[...LEFT_LINKS, ...RIGHT_LINKS.filter((l) => l.label !== "Cart (0)")].map(
             (l) => (
               <li key={l.label} className="overflow-hidden">
@@ -239,7 +273,7 @@ export default function Navbar() {
                     href={l.href}
                     onClick={() => setOpen(false)}
                     style={NAV_FONT}
-                    className="block text-5xl leading-[1.1] tracking-tighter"
+                    className="block py-1 text-[clamp(2.25rem,11vw,4.5rem)] leading-[1.1] tracking-tighter"
                   >
                     {l.label}
                   </Link>

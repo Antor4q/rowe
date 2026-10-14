@@ -62,6 +62,7 @@ const PRODUCTS: Product[] = [
 
 const formatPrice = (n: number) => `$${n.toLocaleString("en-US")}`;
 
+// sizes = actual rendered width, jate Next/Image choto device e choto file pathay
 const SLOTS = [
   {
     l: "0%",
@@ -70,6 +71,7 @@ const SLOTS = [
     ratio: "aspect-[10/7]",
     mobile: "col-span-2",
     amp: 30,
+    sizes: "(min-width: 768px) 46vw, 100vw",
   },
   {
     l: "68.2%",
@@ -78,6 +80,7 @@ const SLOTS = [
     ratio: "aspect-[31/30]",
     mobile: "",
     amp: 50,
+    sizes: "(min-width: 768px) 32vw, 50vw",
   },
   {
     l: "0%",
@@ -86,6 +89,7 @@ const SLOTS = [
     ratio: "aspect-[9/10]",
     mobile: "mt-10",
     amp: 40,
+    sizes: "(min-width: 768px) 27vw, 50vw",
   },
   {
     l: "36.2%",
@@ -94,6 +98,7 @@ const SLOTS = [
     ratio: "aspect-[7/5]",
     mobile: "col-span-2",
     amp: 25,
+    sizes: "(min-width: 768px) 28vw, 100vw",
   },
   {
     l: "72.1%",
@@ -102,6 +107,7 @@ const SLOTS = [
     ratio: "aspect-[5/6]",
     mobile: "col-start-2",
     amp: 45,
+    sizes: "(min-width: 768px) 28vw, 50vw",
   },
 ];
 
@@ -116,7 +122,7 @@ export default function FeaturedProducts() {
 
     const mm = gsap.matchMedia(root);
 
-    // Scroll reveal
+    // Scroll reveal (shob device)
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.from("[data-head]", {
         y: 40,
@@ -127,7 +133,7 @@ export default function FeaturedProducts() {
         clearProps: "opacity,transform,visibility",
         scrollTrigger: {
           trigger: root,
-          start: "top 75%",
+          start: "top 80%",
         },
       });
 
@@ -140,17 +146,25 @@ export default function FeaturedProducts() {
         clearProps: "opacity,transform,visibility",
         scrollTrigger: {
           trigger: gridRef.current,
-          start: "top 80%",
+          // mobile e grid lomba, tai ektu aage trigger
+          start: "top 85%",
         },
       });
     });
 
-    // Desktop parallax
+    // Parallax: tablet e amplitude kom (card overlap na hoye), desktop e full
     mm.add(
-      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
-      () => {
+      {
+        isTablet:
+          "(min-width: 768px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference)",
+        isDesktop:
+          "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+      },
+      (ctx) => {
+        const k = ctx.conditions?.isDesktop ? 1 : 0.5;
+
         gsap.utils.toArray<HTMLElement>("[data-par]", root).forEach((el) => {
-          const amp = Number(el.dataset.amp ?? 30);
+          const amp = Number(el.dataset.amp ?? 30) * k;
 
           gsap.fromTo(
             el,
@@ -181,14 +195,14 @@ export default function FeaturedProducts() {
   return (
     <section
       ref={sectionRef}
-      className="bg-white py-24 text-[#222628]"
+      className="overflow-x-clip bg-white py-16 text-[#222628] sm:py-20 md:py-24 lg:py-28"
     >
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header: mobile e stack, md+ e side by side */}
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-8">
           <h2
             data-head
-            className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}
+            className={`${serif.className} text-[2.75rem] font-semibold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[110px]`}
           >
             Designed To
             <br />
@@ -197,7 +211,7 @@ export default function FeaturedProducts() {
 
           <p
             data-head
-            className="hidden font-sans text-[18px] font-medium leading-snug md:block md:w-[31.8%]"
+            className="max-w-md font-sans text-base font-medium leading-snug sm:text-[17px] md:w-[31.8%] md:max-w-none md:shrink-0 lg:text-[18px]"
           >
             Upholstered furniture designed and made to be lived in, from
             solid ash and natural fabrics.
@@ -208,7 +222,7 @@ export default function FeaturedProducts() {
         {/* aspect ratio 434/452 -> 434/369, SLOTS er top % gulo rescale kora (x1.225) jate layout same thake */}
         <div
           ref={gridRef}
-          className="relative mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-16 md:block md:aspect-[434/369]"
+          className="relative mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:mt-12 sm:gap-x-6 sm:gap-y-10 md:mt-16 md:block md:aspect-[434/369]"
         >
           {PRODUCTS.map((p, i) => {
             const s = SLOTS[i];
@@ -233,42 +247,43 @@ export default function FeaturedProducts() {
                     <Link
                       href={`/shop/${p.slug}`}
                       aria-label={p.name}
-                      className="absolute inset-0 block"
+                      className="absolute inset-0 block focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#222628]"
                     >
+                      {/* hover effect shudhu hover-capable device e (touch e sticky hover hobe na) */}
                       <Image
                         src={p.src}
                         alt={p.name}
                         fill
-                        sizes="(min-width: 1024px) 45vw, 50vw"
-                        className="object-cover transition-opacity duration-500 group-hover:opacity-0"
+                        sizes={s.sizes}
+                        className="object-cover transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-0"
                       />
 
                       <Image
                         src={p.hoverSrc}
                         alt=""
                         fill
-                        sizes="(min-width: 1024px) 45vw, 50vw"
-                        className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                        sizes={s.sizes}
+                        className="object-cover opacity-0 transition-opacity duration-500 [@media(hover:hover)]:group-hover:opacity-100"
                       />
                     </Link>
 
-                    {/* Add to cart */}
+                    {/* Add to cart: touch e shobsomoy visible, desktop e hover/focus e slide up */}
                     <button
                       type="button"
                       onClick={() => onAdd(p)}
-                      className="absolute inset-x-0 bottom-0 z-10 translate-y-full bg-[#222628] py-3 font-sans text-sm font-medium text-white transition-transform duration-500 ease-out group-hover:translate-y-0 [@media(hover:none)]:translate-y-0"
+                      className="absolute inset-x-0 bottom-0 z-10 bg-[#222628] py-2 font-sans text-xs font-medium text-white transition-transform duration-500 ease-out focus-visible:translate-y-0 sm:py-2.5 sm:text-sm md:py-3 [@media(hover:hover)]:translate-y-full [@media(hover:hover)]:group-focus-within:translate-y-0 [@media(hover:hover)]:group-hover:translate-y-0"
                     >
                       Add to cart
                     </button>
                   </div>
 
-                  {/* Product details */}
-                  <div className="mt-3 flex items-start justify-between gap-4 font-sans">
-                    <h3 className="text-sm font-medium leading-snug md:text-base lg:text-lg">
+                  {/* Product details: choto card e wrap korbe */}
+                  <div className="mt-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-0.5 font-sans">
+                    <h3 className="text-sm font-medium leading-snug md:text-sm lg:text-base xl:text-lg">
                       {p.name}
                     </h3>
 
-                    <span className="shrink-0 text-sm font-medium md:text-base lg:text-lg">
+                    <span className="shrink-0 text-sm font-medium md:text-sm lg:text-base xl:text-lg">
                       {formatPrice(p.price)}
                     </span>
                   </div>

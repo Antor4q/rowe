@@ -60,7 +60,8 @@ export default function CollectionSection() {
 
   /* ---------- Hover: item + description + image pura group ta center e thake ---------- */
   const onEnter = (i: number) => {
-    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    // touch device e hover nai, tai preview shudhu real hover (mouse/trackpad) e cholbe
+    if (!window.matchMedia("(min-width: 768px) and (hover: hover)").matches) return;
     const list = listRef.current;
     const row = rowRefs.current[i];
     const text = textRefs.current[i];
@@ -107,20 +108,29 @@ export default function CollectionSection() {
   };
 
   return (
-    <section ref={sectionRef} className="bg-[#f3f1ec] py-20 text-[#222628] md:py-28">
-      <div className="container mx-auto">
+    <section
+      ref={sectionRef}
+      className="overflow-x-clip bg-[#f3f1ec] py-16 text-[#222628] sm:py-20 md:py-28"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header */}
-        <div className="flex items-start justify-between gap-8">
-          <h2 data-head className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}>
+        <div className="flex flex-col gap-5 sm:gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+          <h2
+            data-head
+            className={`${serif.className} text-5xl font-semibold leading-none sm:text-6xl md:text-7xl lg:text-8xl xl:text-[110px]`}
+          >
             Our Collection
           </h2>
-          <p data-head className="hidden max-w-[320px] font-sans text-[18px] font-medium leading-snug md:block">
+          <p
+            data-head
+            className="max-w-[420px] font-sans text-base font-medium leading-snug sm:text-[17px] md:text-[18px] lg:max-w-[320px]"
+          >
             Considered furniture for modern homes, made slowly from solid ash and natural fabrics.
           </p>
         </div>
 
         {/* Category lines */}
-        <div ref={listRef} className="relative mt-12 md:mt-16" onMouseLeave={onLeave}>
+        <div ref={listRef} className="relative mt-10 sm:mt-12 md:mt-16" onMouseLeave={onLeave}>
           {CATEGORIES.map((c, i) => (
             <Link
               key={c.name}
@@ -129,7 +139,7 @@ export default function CollectionSection() {
                 rowRefs.current[i] = el;
               }}
               onMouseEnter={() => onEnter(i)}
-              className="flex justify-center py-[0.8vw]"
+              className="flex justify-center py-2 sm:py-2.5 md:py-[0.8vw]"
             >
               {/* Text ekdom center e thake. Count ar mobile thumbnail text er pashe jhule thake, tai centering nosto kore na */}
               <span
@@ -140,7 +150,7 @@ export default function CollectionSection() {
               >
                 <span
                   data-count
-                  className="absolute right-full top-1 mr-3 font-sans text-xs text-[#222628]/35 md:top-[0.8vw] md:text-base"
+                  className="absolute right-full top-1 mr-2 font-sans text-[11px] text-[#222628]/35 sm:mr-3 sm:text-xs md:top-[0.8vw] md:text-base"
                 >
                   ({c.count})
                 </span>
@@ -148,14 +158,14 @@ export default function CollectionSection() {
                 <span className="block overflow-hidden">
                   <span
                     data-line
-                    className="block font-sans text-[clamp(2rem,7vw,7rem)] font-medium uppercase leading-[1.02] tracking-tight"
+                    className="block font-sans text-[clamp(1.625rem,8vw,2.5rem)] font-medium uppercase leading-[1.02] tracking-tight md:text-[clamp(2rem,7vw,7rem)]"
                   >
                     {c.name}
                   </span>
                 </span>
 
                 {/* Mobile thumbnail (hover nai) */}
-                <span className="absolute left-full top-1/2 ml-3 h-10 w-12 -translate-y-1/2 overflow-hidden bg-[#e6e2d9] md:hidden">
+                <span className="absolute left-full top-1/2 ml-2 h-8 w-10 -translate-y-1/2 overflow-hidden bg-[#e6e2d9] sm:ml-3 sm:h-10 sm:w-12 md:hidden">
                   <Image
                     src={c.src}
                     alt=""

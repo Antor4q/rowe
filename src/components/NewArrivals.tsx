@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
@@ -26,7 +25,8 @@ const NEW_ITEMS = [
 ];
 
 const COPIES = 4;
-const SPEED = 90;
+const SPEED = 90; // desktop hover speed (px/s)
+const DRIFT = 35; // touch device e slow auto drift (px/s)
 
 const LOOP_ITEMS = Array.from({ length: COPIES }).flatMap((_, copy) =>
   NEW_ITEMS.map((p) => ({ ...p, copy })),
@@ -50,6 +50,7 @@ export default function NewArrivals() {
         y: 30,
         opacity: 0,
         duration: 0.8,
+        stagger: 0.1,
         ease: "power3.out",
         clearProps: "opacity,transform,visibility",
         scrollTrigger: {
@@ -67,7 +68,7 @@ export default function NewArrivals() {
         clearProps: "opacity,transform,visibility",
         scrollTrigger: {
           trigger: root,
-          start: "top 80%",
+          start: "top 85%",
         },
       });
     });
@@ -77,6 +78,10 @@ export default function NewArrivals() {
     const items = Array.from(
       track.querySelectorAll<HTMLElement>("[data-slide]"),
     );
+
+    // live media queries: device/setting change hole auto update hoy
+    const mqHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     let period = 0;
 
@@ -111,7 +116,12 @@ export default function NewArrivals() {
         v = v * 0.6 + (dt ? accum / dt : 0) * 0.4;
         accum = 0;
       } else {
-        const target = hovering ? -SPEED : 0;
+        // desktop: hover e scroll | touch: slow drift | reduced motion: shudhu drag
+        let target = 0;
+
+        if (!mqReduce.matches) {
+          target = mqHover.matches ? (hovering ? -SPEED : 0) : -DRIFT;
+        }
 
         v += (target - v) * (1 - Math.exp(-dt * 3));
         x += v * dt;
@@ -131,6 +141,8 @@ export default function NewArrivals() {
       trigger: track,
       type: "x",
       minimumMovement: 4,
+      // vertical page scroll touch e jate kaj kore
+      allowNativeTouchScrolling: true,
 
       onPress() {
         dragging = true;
@@ -158,13 +170,15 @@ export default function NewArrivals() {
       },
     });
 
-    /* ---------- Hover: product cards only ---------- */
+    /* ---------- Hover: mouse only ---------- */
 
-    const onEnter = () => {
+    const onEnter = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
       if (!dragging) hovering = true;
     };
 
-    const onLeave = () => {
+    const onLeave = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
       hovering = false;
     };
 
@@ -181,7 +195,7 @@ export default function NewArrivals() {
 
     observer.observe(root);
 
-    /* ---------- Resize ---------- */
+    /* ---------- Resize / rotate ---------- */
 
     const onResize = () => {
       const oldPeriod = period;
@@ -213,38 +227,39 @@ export default function NewArrivals() {
   return (
     <section
       ref={sectionRef}
-      className="overflow-hidden bg-[#f3f1ec] py-10 text-[#222628] sm:py-12 md:py-24"
+      className="overflow-hidden bg-[#f3f1ec] py-12 text-[#222628] sm:py-16 md:py-24 lg:py-28"
     >
-       {/* Header */}
-        <div className="flex items-start justify-between gap-8 container mx-auto mb-14">
-          <h2
-            data-head
-            className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}
-          >
-           New Arrivals
-          </h2>
+      {/* Header: mobile e stack, md+ e side by side */}
+      <div className="container mx-auto mb-8 flex flex-col gap-5 px-4 sm:mb-10 sm:px-6 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-8 lg:px-8">
+        <h2
+          data-head
+          className={`${serif.className} text-[2.75rem] font-semibold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[110px]`}
+        >
+          New Arrivals
+        </h2>
 
-          <p
-            data-head
-            className="hidden font-sans text-[18px] font-medium leading-snug md:block md:w-[31.8%]"
-          >
-            Upholstered furniture designed and made to be lived in, from
-            solid ash and natural fabrics.
-          </p>
-        </div>
+        <p
+          data-head
+          className="max-w-md font-sans text-base font-medium leading-snug sm:text-[17px] md:w-[31.8%] md:max-w-none md:shrink-0 lg:text-[18px]"
+        >
+          Upholstered furniture designed and made to be lived in, from
+          solid ash and natural fabrics.
+        </p>
+      </div>
 
-      {/* Slider: no full-height wrapper or excess vertical spacing */}
-      <div className="relative mt-6 sm:mt-8">
+      {/* Slider */}
+      <div className="relative">
         <div
           ref={trackRef}
-          className="relative flex h-[220px] w-max shrink-0 select-none items-center gap-4 will-change-transform sm:h-[260px] sm:gap-6 md:h-[300px] md:gap-10 lg:gap-14"
+          className="relative flex w-max shrink-0 touch-pan-y select-none items-center gap-4 will-change-transform sm:gap-6 md:gap-10 lg:gap-14"
         >
           {LOOP_ITEMS.map((p) => (
             <article
               key={`${p.slug}-${p.copy}`}
               data-slide
               aria-hidden={p.copy > 0}
-              className="h-full w-[280px] shrink-0 transition-transform duration-500 ease-out hover:z-10 hover:scale-[1.06] sm:w-[340px] md:w-[420px] md:hover:scale-[1.1]"
+              // fixed height er bodole aspect ratio: width onujayi height auto adjust hoy
+              className="aspect-[5/4] w-[min(280px,78vw)] shrink-0 transition-transform duration-500 ease-out sm:aspect-[4/3] sm:w-[340px] md:aspect-[7/5] md:w-[420px] [@media(hover:hover)]:hover:z-10 [@media(hover:hover)]:hover:scale-[1.06] md:[@media(hover:hover)]:hover:scale-[1.1]"
             >
               <Link
                 href={`/shop/${p.slug}`}
@@ -254,7 +269,7 @@ export default function NewArrivals() {
                 onClick={(event) => {
                   if (draggedRef.current) event.preventDefault();
                 }}
-                className="relative block h-full w-full cursor-grab overflow-hidden bg-[#e6e2d9] active:cursor-grabbing"
+                className="relative block h-full w-full cursor-grab overflow-hidden bg-[#e6e2d9] active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#222628]"
               >
                 <Image
                   src={p.src}
@@ -265,7 +280,7 @@ export default function NewArrivals() {
                   className="object-cover"
                 />
 
-                <span className="absolute left-3 top-3 bg-white px-3 py-1 font-sans text-[11px] font-medium uppercase tracking-wide">
+                <span className="absolute left-2 top-2 bg-white px-2.5 py-1 font-sans text-[11px] font-medium uppercase tracking-wide sm:left-3 sm:top-3 sm:px-3">
                   New
                 </span>
               </Link>

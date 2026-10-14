@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -95,17 +101,21 @@ export default function Testimonials() {
         stagger: 0.1,
         ease: "power3.out",
         clearProps: "opacity,transform,visibility",
-        scrollTrigger: { trigger: root, start: "top 75%" },
+        scrollTrigger: { trigger: root, start: "top 80%" },
       });
 
-      gsap.from("[data-stage]", {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.12,
-        ease: "power3.out",
-        clearProps: "opacity,transform,visibility",
-        scrollTrigger: { trigger: "[data-stage]", start: "top 85%" },
+      // Prottek stage item nijer position e reveal hoy
+      // (mobile e image ar quote upore-niche thake, tai alada trigger dorkar)
+      gsap.utils.toArray<HTMLElement>("[data-stage]", root).forEach((el, i) => {
+        gsap.from(el, {
+          y: 60,
+          opacity: 0,
+          duration: 1,
+          delay: i * 0.12,
+          ease: "power3.out",
+          clearProps: "opacity,transform,visibility",
+          scrollTrigger: { trigger: el, start: "top 85%" },
+        });
       });
     });
 
@@ -123,8 +133,9 @@ export default function Testimonials() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
+      // shudhu active panel er element animate hoy
       gsap.fromTo(
-        "[data-q]",
+        "[data-active] [data-q]",
         { y: 24, opacity: 0 },
         {
           y: 0,
@@ -140,7 +151,7 @@ export default function Testimonials() {
     return () => ctx.revert();
   }, [active]);
 
-  // Autoplay (pauses on hover/focus)
+  // Autoplay (pauses on mouse hover / keyboard focus)
   useEffect(() => {
     if (paused) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -152,48 +163,57 @@ export default function Testimonials() {
     return () => window.clearInterval(id);
   }, [paused, active]);
 
+  // Touch e tap korle hover emulate hoye autoplay atke jay, tai shudhu real mouse e pause
+  const onPointerEnter = (e: ReactPointerEvent) => {
+    if (e.pointerType === "mouse") setPaused(true);
+  };
+
+  const onPointerLeave = (e: ReactPointerEvent) => {
+    if (e.pointerType === "mouse") setPaused(false);
+  };
+
   const story = STORIES[active];
 
   return (
     <section
       ref={sectionRef}
-      className="bg-[#f0eee8] py-24 text-[#222628]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className="bg-[#f0eee8] py-16 text-[#222628] sm:py-20 md:py-24 lg:py-28"
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header: mobile e stack, md+ e side by side */}
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between md:gap-8">
           <h2
             data-head
-            className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}
+            className={`${serif.className} text-[2.75rem] font-semibold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl xl:text-[110px]`}
           >
             In Their
-           
+            <br />
             Words
           </h2>
 
           <div
             data-head
-            className="hidden md:block md:w-[31.8%]"
+            className="max-w-md md:w-[31.8%] md:max-w-none md:shrink-0"
           >
-            <p className="font-sans text-[18px] font-medium leading-snug">
+            <p className="font-sans text-base font-medium leading-snug sm:text-[17px] lg:text-[18px]">
               Real owners, real living rooms. See how Rowe holds up from the
               first day to the first year.
             </p>
-            <p className="mt-4 font-sans text-sm font-medium text-[#222628]/60">
+            <p className="mt-3 font-sans text-sm font-medium text-[#222628]/60 sm:mt-4">
               4.9 out of 5 from 20,000+ verified owners
             </p>
           </div>
         </div>
 
         {/* Stage */}
-        <div className="mt-12 grid grid-cols-1 gap-10 md:mt-16 md:grid-cols-12 md:gap-8">
+        <div className="mt-10 grid grid-cols-1 gap-8 sm:mt-12 sm:gap-10 md:mt-16 md:grid-cols-12 md:gap-8">
           {/* Image */}
           <div data-stage className="md:col-span-5">
-            <div className="relative aspect-[4/3] overflow-hidden bg-[#e6e2d9]">
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#e6e2d9] md:aspect-[4/5] lg:aspect-[4/3]">
               {STORIES.map((s, i) => (
                 <Image
                   key={s.product}
@@ -207,7 +227,7 @@ export default function Testimonials() {
                 />
               ))}
 
-              <div className="absolute bottom-0 left-0 bg-white px-4 py-3 font-sans">
+              <div className="absolute bottom-0 left-0 bg-white px-3 py-2.5 font-sans sm:px-4 sm:py-3">
                 <p className="text-xs font-medium text-[#222628]/60">
                   Owned by {story.name.split(" ")[0]}
                 </p>
@@ -223,26 +243,46 @@ export default function Testimonials() {
             data-stage
             className="flex flex-col justify-center md:col-span-6 md:col-start-7"
           >
-            <div aria-live="polite">
-              <div data-q>
-                <Stars />
-              </div>
+            {/*
+              Shob quote ek-i grid cell e stack kora, inactive gulo invisible.
+              Ete container er height shobcheye lomba quote er shoman thake,
+              tai quote badlale niche er content lafay na (mobile e especially important).
+            */}
+            <div aria-live="polite" className="grid">
+              {STORIES.map((s, i) => {
+                const isActive = i === active;
 
-              <blockquote
-                data-q
-                className={`${serif.className} mt-6 text-3xl font-medium italic leading-[1.15] md:min-h-[260px] md:text-5xl lg:text-6xl`}
-              >
-                &ldquo;{story.quote}&rdquo;
-              </blockquote>
+                return (
+                  <div
+                    key={s.name}
+                    data-active={isActive ? "true" : undefined}
+                    aria-hidden={!isActive}
+                    className={`col-start-1 row-start-1 ${
+                      isActive ? "" : "pointer-events-none invisible"
+                    }`}
+                  >
+                    <div data-q>
+                      <Stars />
+                    </div>
 
-              <div data-q className="mt-8 font-sans">
-                <p className="text-base font-medium md:text-lg">
-                  {story.name}
-                </p>
-                <p className="text-sm font-medium text-[#222628]/60">
-                  {story.city} &middot; Verified owner
-                </p>
-              </div>
+                    <blockquote
+                      data-q
+                      className={`${serif.className} mt-5 text-2xl font-medium italic leading-[1.15] min-[390px]:text-[1.75rem] sm:mt-6 sm:text-4xl md:text-3xl lg:text-5xl xl:text-6xl`}
+                    >
+                      &ldquo;{s.quote}&rdquo;
+                    </blockquote>
+
+                    <div data-q className="mt-6 font-sans sm:mt-8">
+                      <p className="text-base font-medium md:text-lg">
+                        {s.name}
+                      </p>
+                      <p className="text-sm font-medium text-[#222628]/60">
+                        {s.city} &middot; Verified owner
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
