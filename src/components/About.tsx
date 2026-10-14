@@ -4,17 +4,19 @@ import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Cormorant_Garamond, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond } from "next/font/google";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const serif = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600", "700"] });
-const display = Playfair_Display({ subsets: ["latin"], weight: ["400", "500", "600"] });
+const serif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
 
-// value = count-up er target, suffix = number er pashe ja thakbe
+// value = count-up target, suffix = number er pashe ja thakbe
 const STATS = [
-  { value: 400, suffix: "+", label: "Products we have completed build." },
-  { value: 98, suffix: "%", label: "Products we have completed build." },
+  { value: 400, suffix: "+", label: "Pieces crafted from responsibly sourced solid ash." },
+  { value: 98, suffix: "%", label: "Of our packaging is recycled or reused." },
 ];
 
 export default function AboutSection() {
@@ -24,10 +26,11 @@ export default function AboutSection() {
   useLayoutEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
+
     const mm = gsap.matchMedia(root);
 
+    // Reveal + count-up
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      // Header reveal
       gsap.from("[data-head]", {
         y: 40,
         opacity: 0,
@@ -38,31 +41,50 @@ export default function AboutSection() {
         scrollTrigger: { trigger: root, start: "top 75%" },
       });
 
-      // Image reveal (clip + inner zoom) ar card reveal
-      const tl = gsap.timeline({ scrollTrigger: { trigger: gridRef.current, start: "top 80%" } });
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: gridRef.current, start: "top 80%" },
+      });
+
       tl.fromTo(
         "[data-img]",
         { clipPath: "inset(100% 0% 0% 0%)" },
-        { clipPath: "inset(0% 0% 0% 0%)", duration: 1.2, ease: "power4.out", clearProps: "clipPath" }
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 1.2,
+          ease: "power4.out",
+          clearProps: "clipPath",
+        }
       )
-        .from("[data-img-inner]", { scale: 1.25, duration: 1.4, ease: "power3.out", clearProps: "transform" }, "<")
+        .from(
+          "[data-img-inner]",
+          { scale: 1.25, duration: 1.4, ease: "power3.out", clearProps: "transform" },
+          "<"
+        )
         .from(
           "[data-stat]",
-          { y: 40, opacity: 0, duration: 0.9, stagger: 0.15, ease: "power3.out", clearProps: "opacity,transform,visibility" },
+          {
+            y: 60,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            clearProps: "opacity,transform,visibility",
+          },
           "<0.3"
         );
 
-      // Count-up
       const counters = root.querySelectorAll<HTMLElement>("[data-count-to]");
+
       counters.forEach((el) => {
         const target = Number(el.dataset.countTo);
         const suffix = el.dataset.suffix ?? "";
         const obj = { v: 0 };
+
         el.textContent = `0${suffix}`; // paint er age 0, jate final value flash na kore
 
         gsap.to(obj, {
           v: target,
-          duration: 2,
+          duration: 2.2,
           ease: "power2.out",
           onUpdate: () => {
             el.textContent = `${Math.round(obj.v)}${suffix}`;
@@ -71,7 +93,7 @@ export default function AboutSection() {
         });
       });
 
-      // Cleanup: revert hole final value fire ashbe
+      // revert hole final value fire ashbe
       return () => {
         counters.forEach((el) => {
           el.textContent = `${el.dataset.countTo}${el.dataset.suffix ?? ""}`;
@@ -79,41 +101,75 @@ export default function AboutSection() {
       };
     });
 
+    // Desktop parallax (numbers move in opposite directions)
+    mm.add(
+      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+      () => {
+        gsap.utils.toArray<HTMLElement>("[data-par]", root).forEach((el) => {
+          const from = Number(el.dataset.from ?? 60);
+          const to = Number(el.dataset.to ?? -60);
+
+          gsap.fromTo(
+            el,
+            { y: from },
+            {
+              y: to,
+              ease: "none",
+              scrollTrigger: {
+                trigger: gridRef.current,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
+            }
+          );
+        });
+      }
+    );
+
     return () => mm.revert();
   }, []);
 
   return (
-    <section id="about" ref={sectionRef} className="bg-white py-20 text-[#222628] md:py-28">
-      <div className="container mx-auto">
+    <section
+      id="about"
+      ref={sectionRef}
+      className="overflow-hidden bg-white py-20 text-[#222628] md:py-28"
+    >
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-12">
-          <h2 data-head className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}>
+          <h2
+            data-head
+            className={`${serif.className} text-5xl font-semibold leading-none md:text-7xl lg:text-8xl xl:text-[110px]`}
+          >
             Eco Rowe
           </h2>
-          <p data-head className="hidden max-w-[520px] font-sans text-[18px] font-medium leading-snug md:block">
-            You&apos;re not only investing in beautiful and comfortable furniture but also reducing negative impacts
-            on the environment. It&apos;s a step towards a greener future.
+
+          <p
+            data-head
+            className="hidden max-w-[520px] font-sans text-[18px] font-medium leading-snug md:block"
+          >
+            You&apos;re not only investing in beautiful and comfortable
+            furniture but also reducing negative impacts on the environment.
+            It&apos;s a step towards a greener future.
           </p>
         </div>
 
-        {/* Stats + image */}
+        {/* Image + giant numbers */}
         <div
           ref={gridRef}
-          className="mt-12 grid grid-cols-2 gap-4 md:mt-20 md:grid-cols-[1fr_auto_1fr] md:gap-8"
+          className="relative mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-20 md:block"
         >
-          {/* Stat 1: desktop e upor-bame */}
-          <StatCard stat={STATS[0]} className="order-2 md:order-1 md:self-start md:justify-self-start" />
-
-          {/* Image: majhkhane. md:max-w-none diye 360px cap tule deya hoyeche */}
+          {/* Image (opaque photo, numbers image er dui pashe thake) */}
           <div
             data-img
-            className="relative order-1 col-span-2 mx-auto aspect-[9/10] w-full max-w-[360px] overflow-hidden md:order-2 md:col-span-1 md:w-[min(34vw,480px)] md:max-w-none lg:w-[min(40vw,600px)]"
+            className="relative z-10 col-span-2 mx-auto aspect-[9/10] w-full max-w-[360px] overflow-hidden bg-[#e6e2d9] md:w-[min(34vw,480px)] md:max-w-none lg:w-[min(40vw,600px)]"
           >
             <div data-img-inner className="absolute inset-0">
-              {/* placeholder image path, nijer image dao */}
               <Image
-                src="/images/neBann.png"
-                alt="Rowe lounge chair"
+                src="/images/ecoChair.jpg"
+                alt="Rowe armchair in solid ash and natural boucle"
                 fill
                 sizes="(min-width: 1024px) 600px, (min-width: 768px) 480px, 90vw"
                 className="object-cover"
@@ -121,29 +177,57 @@ export default function AboutSection() {
             </div>
           </div>
 
+          {/* Stat 1: desktop e upor-bame */}
+          <Stat
+            stat={STATS[0]}
+            className="md:absolute md:left-0 md:top-[2%] md:z-0"
+            from={70}
+            to={-70}
+          />
+
           {/* Stat 2: desktop e niche-dane */}
-          <StatCard stat={STATS[1]} className="order-3 md:self-end md:justify-self-end" />
+          <Stat
+            stat={STATS[1]}
+            className="md:absolute md:bottom-[2%] md:right-0 md:z-0 md:items-end md:text-right"
+            from={-70}
+            to={70}
+            right
+          />
         </div>
       </div>
     </section>
   );
 }
 
-function StatCard({ stat, className = "" }: { stat: (typeof STATS)[number]; className?: string }) {
+function Stat({
+  stat,
+  className = "",
+  from,
+  to,
+  right = false,
+}: {
+  stat: (typeof STATS)[number];
+  className?: string;
+  from: number;
+  to: number;
+  right?: boolean;
+}) {
   return (
-    <div
-      data-stat
-      className={`flex w-full flex-col items-center bg-[#f4f0e8] px-6 py-6 text-center md:w-[clamp(200px,17vw,260px)] ${className}`}
-    >
-      <span
-        data-count-to={stat.value}
-        data-suffix={stat.suffix}
-        className={`${display.className} text-5xl font-medium leading-none md:text-6xl lg:text-7xl`}
-      >
-        {stat.value}
-        {stat.suffix}
-      </span>
-      <p className="mt-3 max-w-[170px] font-sans text-sm font-medium leading-snug">{stat.label}</p>
+    <div data-stat className={`flex flex-col ${className}`}>
+      <div data-par data-from={from} data-to={to} className="flex flex-col">
+        <span
+          data-count-to={stat.value}
+          data-suffix={stat.suffix}
+          className={`${serif.className} block text-[17vw] font-semibold leading-[0.85] [font-variant-numeric:lining-nums] md:text-[clamp(96px,14.5vw,260px)]`}
+        >
+          {stat.value}
+          {stat.suffix}
+        </span>
+
+        <p className={`mt-3 max-w-[220px] font-sans text-sm font-medium leading-snug md:mt-4 md:text-base md:max-w-[260px] ${right ? "md:ml-auto" : ""}`}>
+          {stat.label}
+        </p>
+      </div>
     </div>
   );
 }

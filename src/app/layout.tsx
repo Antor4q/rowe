@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Loader from "@/components/Loader";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -34,7 +36,9 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-[#F3EFEA] text-[#281C15] font-sans antialiased overflow-x-hidden selection:bg-[#281C15] selection:text-[#F3EFEA]">
         <Navbar/>
+        <Loader/>
         {children}
+        <Footer/>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import AboutSection from "@/components/About";
 import CollectionSection from "@/components/Collection";
+import FAQ from "@/components/Faq";
 import FeaturedProducts from "@/components/Featured";
 import Hero from "@/components/HeroSection";
 import NewArrivals from "@/components/NewArrivals";
@@ -17,6 +18,7 @@ export default function page() {
      <NewArrivals/>
      <WhyRowe/>
      <Testimonials/>
+     <FAQ/>
     </div>
   )
 }

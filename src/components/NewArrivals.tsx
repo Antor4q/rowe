@@ -17,12 +17,12 @@ const serif = Cormorant_Garamond({
 });
 
 const NEW_ITEMS = [
-  { slug: "noor-bench", name: "Noor Bench", src: "/images/coll1.jpg" },
-  { slug: "tano-armchair", name: "Tano Armchair", src: "/images/coll2.jpg" },
-  { slug: "vale-bed-frame", name: "Vale Bed Frame", src: "/images/coll3.jpg" },
-  { slug: "ora-desk", name: "Ora Desk", src: "/images/coll4.jpg" },
-  { slug: "luma-side-table", name: "Luma Side Table", src: "/images/coll5.jpg" },
-  { slug: "sori-lounge-sofa", name: "Sori Lounge Sofa", src: "/images/coll1.jpg" },
+  { slug: "noor-bench", name: "Noor Bench", src: "/images/ne1.jpg" },
+  { slug: "tano-armchair", name: "Tano Armchair", src: "/images/ne2.jpg" },
+  { slug: "vale-bed-frame", name: "Vale Bed Frame", src: "/images/ne3.jpg" },
+  { slug: "ora-desk", name: "Ora Desk", src: "/images/ne4.jpg" },
+  { slug: "luma-side-table", name: "Luma Side Table", src: "/images/ne5.jpg" },
+  { slug: "sori-lounge-sofa", name: "Sori Lounge Sofa", src: "/images/ne6.jpg" },
 ];
 
 const COPIES = 4;

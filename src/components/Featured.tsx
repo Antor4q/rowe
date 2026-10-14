@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
@@ -28,36 +27,36 @@ const PRODUCTS: Product[] = [
     slug: "orla-sofa",
     name: "Orla Sofa",
     price: 2400,
-    src: "/images/coll1.jpg",
-    hoverSrc: "/images/coll3.jpg",
+    src: "/images/pro6.jpg",
+    hoverSrc: "/images/proV5.jpg",
   },
   {
     slug: "noir-sectional",
     name: "Noir Sectional",
     price: 3200,
-    src: "/images/coll2.jpg",
-    hoverSrc: "/images/coll4.jpg",
+    src: "/images/pro2U.png",
+    hoverSrc: "/images/proV2.jpg",
   },
   {
     slug: "sela-lounge-chair",
     name: "Sela Lounge Chair",
     price: 890,
-    src: "/images/coll3.jpg",
-    hoverSrc: "/images/coll5.jpg",
+    src: "/images/pro7.jpg",
+    hoverSrc: "/images/proV3.jpg",
   },
   {
     slug: "mira-loveseat",
     name: "Mira Loveseat",
     price: 1450,
-    src: "/images/coll4.jpg",
-    hoverSrc: "/images/coll2.jpg",
+    src: "/images/pro4U.jpg",
+    hoverSrc: "/images/pro4V.jpg",
   },
   {
     slug: "kaya-armchair",
     name: "Kaya Armchair",
     price: 790,
-    src: "/images/coll5.jpg",
-    hoverSrc: "/images/coll1.jpg",
+    src: "/images/proL.jpg",
+    hoverSrc: "/images/proLl.jpg",
   },
 ];
 
@@ -74,7 +73,7 @@ const SLOTS = [
   },
   {
     l: "68.2%",
-    t: "6.8%",
+    t: "8.3%",
     w: "31.8%",
     ratio: "aspect-[31/30]",
     mobile: "",
@@ -82,7 +81,7 @@ const SLOTS = [
   },
   {
     l: "0%",
-    t: "35.4%",
+    t: "43.4%",
     w: "26.3%",
     ratio: "aspect-[9/10]",
     mobile: "mt-10",
@@ -90,7 +89,7 @@ const SLOTS = [
   },
   {
     l: "36.2%",
-    t: "49.6%",
+    t: "60.8%",
     w: "27.4%",
     ratio: "aspect-[7/5]",
     mobile: "col-span-2",
@@ -98,7 +97,7 @@ const SLOTS = [
   },
   {
     l: "72.1%",
-    t: "44.9%",
+    t: "55%",
     w: "27.9%",
     ratio: "aspect-[5/6]",
     mobile: "col-start-2",
@@ -206,9 +205,10 @@ export default function FeaturedProducts() {
         </div>
 
         {/* Product grid */}
+        {/* aspect ratio 434/452 -> 434/369, SLOTS er top % gulo rescale kora (x1.225) jate layout same thake */}
         <div
           ref={gridRef}
-          className="relative mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-16 md:block md:aspect-[434/452]"
+          className="relative mt-12 grid grid-cols-2 gap-x-4 gap-y-10 md:mt-16 md:block md:aspect-[434/369]"
         >
           {PRODUCTS.map((p, i) => {
             const s = SLOTS[i];
@@ -228,7 +228,7 @@ export default function FeaturedProducts() {
               >
                 <div data-par data-amp={s.amp}>
                   <div
-                    className={`relative overflow-hidden bg-[#e6e2d9] ${s.ratio}`}
+                    className={`relative overflow-hidden bg-[#F5F3F1] ${s.ratio}`}
                   >
                     <Link
                       href={`/shop/${p.slug}`}
